@@ -1,4 +1,5 @@
 import "dotenv/config"
+import path from "path"
 import express from "express"
 import cors from "cors"
 import { ExpressAuth } from "@auth/express"
@@ -38,6 +39,16 @@ app.use("/webhooks", webhooksRouter)
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" })
 })
+
+if (process.env.NODE_ENV === "production") {
+  const frontendDist = process.env.FRONTEND_DIST_PATH || "/app/public"
+  app.use(express.static(frontendDist))
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"), (err) => {
+      if (err) res.status(500).send("Erro ao carregar a página")
+    })
+  })
+}
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`)
