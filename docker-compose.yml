@@ -1,5 +1,5 @@
 services:
-  postgres:
+  melao-postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -9,47 +9,47 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-    ports:
-      - "5432:5432"
+    #ports:
+      #- "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U melao"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-  app:
+  melao-app:
     build: .
     restart: unless-stopped
     depends_on:
-      postgres:
+      melao-postgres:
         condition: service_healthy
+    env_file: .env
     environment:
       PORT: 3000
-      DATABASE_URL: postgres://melao:${POSTGRES_PASSWORD:-melao123}@postgres:5432/melao
-      AUTH_SECRET: ${AUTH_SECRET:-change-me-in-production}
+      NODE_ENV: production
+      DATABASE_URL: postgres://melao:${POSTGRES_PASSWORD:-melao123}@melao-postgres:5432/melao
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       EVOLUTION_API_URL: ${EVOLUTION_API_URL:-http://evolution:8080}
-      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-}
-    ports:
-      - "3000:3000"
+    #ports:
+      #- "3000:3000"
 
-  evolution:
+  melao-evolution:
     build: ./evolution
     restart: unless-stopped
     depends_on:
-      postgres:
+      melao-postgres:
         condition: service_healthy
     environment:
       DATABASE_ENABLED: "true"
       DATABASE_PROVIDER: postgresql
-      DATABASE_CONNECTION_URI: postgres://melao:${POSTGRES_PASSWORD:-melao123}@postgres:5432/melao
+      DATABASE_CONNECTION_URI: postgres://melao:${POSTGRES_PASSWORD:-melao123}@melao-postgres:5432/melao
       REDIS_ENABLED: "false"
       CACHE_REDIS_ENABLED: "false"
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-}
     volumes:
       - evolution_data:/evolution/store
-    ports:
-      - "8080:8080"
+    #ports:
+      #- "8080:8080"
 
 volumes:
   postgres_data:
