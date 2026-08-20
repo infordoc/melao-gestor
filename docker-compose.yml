@@ -29,7 +29,7 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgres://melao:${POSTGRES_PASSWORD:-melao123}@melao-postgres:5432/melao
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      EVOLUTION_API_URL: ${EVOLUTION_API_URL:-http://evolution:8080}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL:-http://melao-evolution:8080}
     #ports:
       #- "3000:3000"
 
@@ -42,7 +42,7 @@ services:
     environment:
       DATABASE_ENABLED: "true"
       DATABASE_PROVIDER: postgresql
-      DATABASE_CONNECTION_URI: postgres://melao:${POSTGRES_PASSWORD:-melao123}@melao-postgres:5432/melao
+      DATABASE_CONNECTION_URI: postgres://melao:${POSTGRES_PASSWORD:-melao123}@${POSTGRES_HOST:-melao-postgres:5432}/melao
       REDIS_ENABLED: "false"
       CACHE_REDIS_ENABLED: "false"
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-}
